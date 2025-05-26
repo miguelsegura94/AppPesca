@@ -41,7 +41,7 @@ namespace DatosPesca.Modelos
             public double TamañoHilo { get; set; }
             public double? TamañoBajo { get; set; }
             public bool Señuelo { get; set; }
-            public string? TipoSeñuelo { get; set; }
+            public string? TipoSeñuelo { get; set; }//jig,minow,vinilo,etc--ENUM
         }
         public class UsuarioInsert
         {

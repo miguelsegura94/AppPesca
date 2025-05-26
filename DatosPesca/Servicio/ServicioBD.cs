@@ -3,6 +3,7 @@ using GestorBaseDatos.GestionCarpeta;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using static DatosPesca.Modelos.DatosPescaModelos;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DatosPesca.Servicio
 {
@@ -72,6 +73,191 @@ namespace DatosPesca.Servicio
                 else
                 {
                     gestion.setError("No hay capturas en ese usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> GetCapturasPorPropiedad(string propiedad, string valor)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                switch (propiedad.ToLower())
+                {
+                    case "especie":
+                        gestion.data = await _context.Capturas.Where(c => c.NombreEspecie == valor).ToListAsync();
+                        break;
+                    case "localidad":
+                        gestion.data = await _context.Capturas.Where(c => c.Localidad == valor).ToListAsync();
+                        break;
+                    case "tamaño":
+                        if (int.TryParse(valor, out int tamañoPez))
+                            gestion.data = await _context.Capturas.Where(c => c.Tamaño == tamañoPez).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño' debe ser numérico.");
+                        return gestion;
+                    case "fecha":
+                        if (DateTime.TryParse(valor, out DateTime fecha))
+                            gestion.data = await _context.Capturas.Where(c => c.Fecha == fecha).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'fecha' debe ser una fecha.");
+                        return gestion;
+                    case "hora":
+                        if (int.TryParse(valor, out int hora))
+                            gestion.data = await _context.Capturas.Where(c => c.HoraAproximada == hora).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'hora' debe ser numérico.");
+                        return gestion;
+                    case "zona":
+                        gestion.data = await _context.Capturas.Where(c => c.Zona == valor).ToListAsync();
+                        break;
+                    case "profundidad":
+                        if (int.TryParse(valor, out int profundidad))
+                            gestion.data = await _context.Capturas.Where(c => c.Profundidad == profundidad).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'profundidad' debe ser numérico.");
+                        return gestion;
+                    case "oleaje":
+                        gestion.data = await _context.Capturas.Where(c => c.Oleaje == valor).ToListAsync();
+                        break;
+                    case "estilo":
+                        gestion.data = await _context.Capturas.Where(c => c.EstiloPesca == valor).ToListAsync();
+                        break;
+                    case "clima":
+                        gestion.data = await _context.Capturas.Where(c => c.TiempoClimatico == valor).ToListAsync();
+                        break;
+                    case "claridad agua":
+                        gestion.data = await _context.Capturas.Where(c => c.ClaridadAgua == valor).ToListAsync();
+                        break;
+                    case "tamaño anzuelo":
+                        if (int.TryParse(valor, out int tamañoAnzuelo))
+                            gestion.data = await _context.Capturas.Where(c => c.TamañoAnzuelo == tamañoAnzuelo).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño anzuelo' debe ser numérico.");
+                        return gestion;
+                    case "tipo gusano":
+                        gestion.data = await _context.Capturas.Where(c => c.TipoGusano == valor).ToListAsync();
+                        break;
+                    case "tamaño bajo":
+                        if (int.TryParse(valor, out int tamañoBajo))
+                            gestion.data = await _context.Capturas.Where(c => c.TamañoBajo == tamañoBajo).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño bajo' debe ser numérico.");
+                        return gestion;
+                    case "tipo señuelo":
+                        gestion.data = await _context.Capturas.Where(c => c.TipoSeñuelo == valor).ToListAsync();
+                        break;
+                    default:
+                        gestion.setError($"La propiedad '{propiedad}' no es válida.");
+                        return gestion;
+                }
+                if (gestion.data.Count > 0)
+                {
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError($"En {propiedad} no hay capturas con valor {valor}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> GetCapturasDeUnUsuarioPorPropiedad(int id,string propiedad,string valor)
+        {
+
+            Gestion gestion = new Gestion();
+            try
+            {
+                bool usuarioExiste = _context.Capturas.Any(c => c.UsuarioId == id);
+                if (!usuarioExiste)
+                {
+                    gestion.setError("El usuario que buscas no existe.");
+                    return gestion;
+                }
+                switch (propiedad.ToLower())
+                {
+                    case "especie":
+                        gestion.data = await _context.Capturas.Where(c => c.NombreEspecie == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "localidad":
+                        gestion.data = await _context.Capturas.Where(c => c.Localidad == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "tamaño":
+                        if (int.TryParse(valor, out int tamañoPez))
+                            gestion.data = await _context.Capturas.Where(c => c.Tamaño == tamañoPez && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño' debe ser numérico.");
+                        return gestion;
+                    case "fecha":
+                        if (DateTime.TryParse(valor, out DateTime fecha))
+                            gestion.data = await _context.Capturas.Where(c => c.Fecha == fecha && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'fecha' debe ser una fecha.");
+                        return gestion;
+                    case "hora":
+                        if (int.TryParse(valor, out int hora))
+                            gestion.data = await _context.Capturas.Where(c => c.HoraAproximada == hora && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'hora' debe ser numérico.");
+                        return gestion;
+                    case "zona":
+                        gestion.data = await _context.Capturas.Where(c => c.Zona == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "profundidad":
+                        if (int.TryParse(valor, out int profundidad))
+                            gestion.data = await _context.Capturas.Where(c => c.Profundidad == profundidad && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'profundidad' debe ser numérico.");
+                        return gestion;
+                    case "oleaje":
+                        gestion.data = await _context.Capturas.Where(c => c.Oleaje == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "estilo":
+                        gestion.data = await _context.Capturas.Where(c => c.EstiloPesca == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "clima":
+                        gestion.data = await _context.Capturas.Where(c => c.TiempoClimatico == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "claridad agua":
+                        gestion.data = await _context.Capturas.Where(c => c.ClaridadAgua == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "tamaño anzuelo":
+                        if (int.TryParse(valor, out int tamañoAnzuelo))
+                            gestion.data = await _context.Capturas.Where(c => c.TamañoAnzuelo == tamañoAnzuelo && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño anzuelo' debe ser numérico.");
+                        return gestion;
+                    case "tipo gusano":
+                        gestion.data = await _context.Capturas.Where(c => c.TipoGusano == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    case "tamaño bajo":
+                        if (int.TryParse(valor, out int tamañoBajo))
+                            gestion.data = await _context.Capturas.Where(c => c.TamañoBajo == tamañoBajo && c.UsuarioId == id).ToListAsync();
+                        else
+                            gestion.setError("El valor para 'tamaño bajo' debe ser numérico.");
+                        return gestion;
+                    case "tipo señuelo":
+                        gestion.data = await _context.Capturas.Where(c => c.TipoSeñuelo == valor && c.UsuarioId == id).ToListAsync();
+                        break;
+                    default:
+                        gestion.setError($"La propiedad '{propiedad}' no es válida.");
+                        return gestion;
+                }
+                if (gestion.data.Count > 0)
+                {
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError($"En {propiedad} no hay capturas con valor {valor}.");
                 }
             }
             catch (Exception ex)

@@ -87,6 +87,50 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpGet("CapturasPorPropiedad/{propiedad}/{valor}")]
+        public async Task<ActionResult> GetCapturasPorPropiedad(string propiedad, string valor)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.GetCapturasPorPropiedad(propiedad,valor);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpGet("CapturasdeUsuarioPorPropiedad/{id}/{propiedad}/{valor}")]
+        public async Task<ActionResult> GetCapturasDeUnUsuarioPorPropiedad(int id,string propiedad,string valor)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.GetCapturasDeUnUsuarioPorPropiedad(id,propiedad,valor);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpPost("Crear usuario")]
         public async Task<ActionResult> CrearUsuario([FromBody] UsuarioInsert modeloUsuario)
         {
