@@ -2,6 +2,8 @@
 using GestorBaseDatos.GestionCarpeta;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using static System.Collections.Specialized.BitVector32;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static DatosPesca.Modelos.DatosPescaModelos;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -15,9 +17,6 @@ namespace DatosPesca.Servicio
         {
             _context = context;
         }
-
-        //TODO EDITAR DATOS EN CAPTURAS
-        //TODO EDITAR A QUE USUARIO PERTENCE UNA CAPTURA
         public async Task<Gestion> GetUsuarios()
         {
             Gestion gestion = new Gestion();
@@ -170,7 +169,7 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
-        public async Task<Gestion> GetCapturasDeUnUsuarioPorPropiedad(int id,string propiedad,string valor)
+        public async Task<Gestion> GetCapturasDeUnUsuarioPorPropiedad(int id, string propiedad, string valor)
         {
 
             Gestion gestion = new Gestion();
@@ -424,8 +423,8 @@ namespace DatosPesca.Servicio
             Gestion gestion = new Gestion();
             try
             {
-                Captura capturaDelete = await _context.Capturas.FirstOrDefaultAsync(c=>c.CapturaId==id);
-                if (capturaDelete!=null)
+                Captura capturaDelete = await _context.Capturas.FirstOrDefaultAsync(c => c.CapturaId == id);
+                if (capturaDelete != null)
                 {
                     _context.Capturas.Remove(capturaDelete);
                     await _context.SaveChangesAsync();
@@ -465,7 +464,7 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
-        public async Task<Gestion> EditarNombreUsuario(int id,string nombre)
+        public async Task<Gestion> EditarNombreUsuario(int id, string nombre)
         {
             Gestion gestion = new Gestion();
             try
@@ -482,6 +481,249 @@ namespace DatosPesca.Servicio
                     _context.Usuarios.Update(usuarioEditar);
                     await _context.SaveChangesAsync();
                     gestion.Correct($"Nombre de usuario editado correctamente. Nuevo nombre: {nombre}");
+                }
+                else
+                {
+                    gestion.setError("No hay usuarios con ese ID");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> EditarCapturasDeUnUsuarioPorPropiedad(int usuarioId, int capturaId, string propiedad, string valor)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                Captura capturaEditar = await _context.Capturas.FirstOrDefaultAsync(c => c.CapturaId == capturaId);
+                bool usuarioExiste = _context.Capturas.Any(c => c.UsuarioId == usuarioId);
+                if (!usuarioExiste)
+                {
+                    gestion.setError("El usuario que buscas no existe.");
+                    return gestion;
+                }
+                if (capturaEditar == null)
+                {
+                    gestion.setError("La captura no existe.");
+                    return gestion;
+                }
+                switch (propiedad.ToLower())
+                {
+                    case "especie":
+                        if (capturaEditar.NombreEspecie == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.NombreEspecie = valor;
+                        break;
+                    case "localidad":
+                        if (capturaEditar.Localidad == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.Localidad = valor;
+                        break;
+                    case "tamaño":
+                        if (int.TryParse(valor, out int tamañoPez))
+                        {
+                            if (capturaEditar.Tamaño == tamañoPez)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.Tamaño = tamañoPez;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'tamaño' debe ser numérico.");
+                        return gestion;
+                    case "fecha":
+                        if (DateTime.TryParse(valor, out DateTime fecha))
+                        {
+                            if (capturaEditar.Fecha == fecha)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.Fecha = fecha;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'fecha' debe ser una fecha.");
+                        return gestion;
+                    case "hora":
+                        if (int.TryParse(valor, out int hora))
+                        {
+                            if (capturaEditar.HoraAproximada == hora)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.HoraAproximada = hora;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'hora' debe ser numérico.");
+                        return gestion;
+                    case "zona":
+                        if (capturaEditar.Zona == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.Zona = valor;
+                        break;
+                    case "profundidad":
+                        if (int.TryParse(valor, out int profundidad))
+                        {
+                            if (capturaEditar.Profundidad == profundidad)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.Profundidad = profundidad;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'profundidad' debe ser numérico.");
+                        return gestion;
+                    case "oleaje":
+                        if (capturaEditar.Oleaje == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.Oleaje = valor;
+                        break;
+                    case "estilo":
+                        if (capturaEditar.EstiloPesca == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.EstiloPesca = valor;
+                        break;
+                    case "clima":
+                        if (capturaEditar.TiempoClimatico == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.TiempoClimatico = valor;
+                        break;
+                    case "claridad agua":
+                        if (capturaEditar.ClaridadAgua == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.ClaridadAgua = valor;
+                        break;
+                    case "tamaño anzuelo":
+                        if (int.TryParse(valor, out int tamañoAnzuelo))
+                        {
+                            if (capturaEditar.TamañoAnzuelo == tamañoAnzuelo)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.TamañoAnzuelo = tamañoAnzuelo;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'tamaño anzuelo' debe ser numérico.");
+                        return gestion;
+                    case "tipo gusano":
+                        if (capturaEditar.TipoGusano == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.TipoGusano = valor;
+                        break;
+                    case "tamaño bajo":
+                        if (int.TryParse(valor, out int tamañoBajo))
+                        {
+                            if (capturaEditar.TamañoBajo == tamañoBajo)
+                            {
+                                gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                                return gestion;
+                            }
+                            capturaEditar.TamañoBajo = tamañoBajo;
+                            break;
+                        }
+                        else
+                            gestion.setError("El valor para 'tamaño bajo' debe ser numérico.");
+                        return gestion;
+                    case "tipo señuelo":
+                        if (capturaEditar.TipoSeñuelo == valor)
+                        {
+                            gestion.setError($"La propiedad {propiedad} ya tiene como valor {valor}");
+                            return gestion;
+                        }
+                        capturaEditar.TipoSeñuelo = valor;
+                        break;
+                    default:
+                        gestion.setError($"La propiedad '{propiedad}' no es válida.");
+                        return gestion;
+                }
+                gestion.Correct($"La propiedad '{propiedad}' ahora tiene como valor {valor}.");
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> EditarAQueUsuarioPerteneceCaptura(int usuarioAntiguo, int usuarioNuevo, int capturaId)
+        {
+            //buscar el usuario que tiene la captura
+            //mostrar las capturas
+            //elegir la captura
+            //decir a que nuevo usuario poner la captura
+            Gestion gestion = new Gestion();
+            try
+            {
+                if (usuarioAntiguo == usuarioNuevo)
+                {
+                    gestion.setError("El usuario nuevo y el antiguo no pueden ser el mismo");
+                    return gestion;
+                }
+                Usuario usuarioAntes = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioAntiguo);
+                if (usuarioAntes != null)
+                {
+                    Captura capturaEditar = await _context.Capturas.FirstOrDefaultAsync(c => c.CapturaId == capturaId);
+                    if (capturaEditar != null)
+                    {
+                        Usuario usuarioAhora = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioNuevo);
+                        if (usuarioAhora != null)
+                        {
+                            if (capturaEditar.UsuarioId != usuarioAntiguo)
+                            {
+                                gestion.setError("Esa captura no pertenece a ese usuario");
+                            }
+                            else
+                            {
+                                capturaEditar.UsuarioId = usuarioNuevo;
+                                gestion.Correct("Captura editada correctamente");
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+                        else
+                        {
+                            gestion.setError("No hay usuarios con ese ID");
+                        }
+                    }
+                    else
+                    {
+                        gestion.setError("No hay capturas con ese ID");
+                    }
                 }
                 else
                 {

@@ -17,7 +17,7 @@ namespace DatosPesca.Modelos
         }
         public class Captura
         {
-            //TODO * OBLIGATORIO, LOS DEMAS DATOS AGREGAR VALOR POR DEFECTO
+            //TODO HACER LOS ENUMS PARA LAS PROPIEDADES NECESARIAS
             [Key]
             public int CapturaId { get; set; }
             public int? UsuarioId { get; set; }
