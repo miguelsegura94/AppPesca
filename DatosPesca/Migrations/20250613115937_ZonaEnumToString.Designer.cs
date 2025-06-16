@@ -4,6 +4,7 @@ using DatosPesca.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatosPesca.Migrations
 {
     [DbContext(typeof(DatosPescaContext))]
-    partial class DatosPescaContextModelSnapshot : ModelSnapshot
+    [Migration("20250613115937_ZonaEnumToString")]
+    partial class ZonaEnumToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,6 @@ namespace DatosPesca.Migrations
                     b.Property<bool>("Anzuelo")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("Cebo")
-                        .HasColumnType("bit");
-
                     b.Property<string>("ClaridadAgua")
                         .HasColumnType("nvarchar(max)");
 
@@ -45,6 +45,9 @@ namespace DatosPesca.Migrations
 
                     b.Property<DateTime?>("Fecha")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Gusano")
+                        .HasColumnType("bit");
 
                     b.Property<int>("HoraAproximada")
                         .HasColumnType("int");
@@ -68,8 +71,8 @@ namespace DatosPesca.Migrations
                     b.Property<double>("Tamaño")
                         .HasColumnType("float");
 
-                    b.Property<string>("TamañoAnzuelo")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("TamañoAnzuelo")
+                        .HasColumnType("int");
 
                     b.Property<double?>("TamañoBajo")
                         .HasColumnType("float");
@@ -80,7 +83,7 @@ namespace DatosPesca.Migrations
                     b.Property<string>("TiempoClimatico")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TipoCebo")
+                    b.Property<string>("TipoGusano")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoSeñuelo")

@@ -15,8 +15,7 @@ namespace DatosPesca.Controllers
         {
             servicioBD = _servicioBD;
         }
-        //TODO METODO GET CON TODAS LAS CAPTURAS DE UN USUARIO POR propiedad GENERICA
-        //TODO METODO GET CON TODAS LAS CAPTURAS POR propiedad GENERICA
+        //TODO HACER UN METODO EDITAR CAPTURA PASANDO EN EL BODY EL MODELO CAPTURA Y OTRO CON EL MODELO CAPTURA OBLIGATORIO
         [HttpGet("Usuarios")]
         public async Task<ActionResult> GetUsuarios()
         {
@@ -37,8 +36,28 @@ namespace DatosPesca.Controllers
             {
                 gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
             }
-
-
+            return BadRequest(gestion);
+        }
+        [HttpGet("UsuariosConCapturas")]
+        public async Task<ActionResult> GetUsuariosConCapturas()
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.GetUsuariosConCapturas();
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
             return BadRequest(gestion);
         }
         [HttpGet("Capturas")]
@@ -153,8 +172,8 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
-        [HttpPost("Añadir Captura")]
-        public async Task<ActionResult> AñadirCapturaCompleta([FromBody] Captura modeloCaptura)
+        [HttpPost("AnadirCaptura")]
+        public async Task<ActionResult> AñadirCapturaCompleta([FromBody] CapturaInsert modeloCaptura)
         {
             Gestion gestion = new Gestion();
             try
@@ -175,7 +194,7 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
-        [HttpPost("Añadir Captura Obligatorio")]
+        [HttpPost("AnadirCapturaObligatorio")]
         public async Task<ActionResult> AñadirCapturaObligatorio([FromBody] CapturaInsertObligatorio modeloCaptura)
         {
             Gestion gestion = new Gestion();
@@ -248,6 +267,28 @@ namespace DatosPesca.Controllers
             try
             {
                 gestion = await servicioBD.EditarNombreUsuario(id,nombre);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpPut("EditarCapturadeUsuario/{usuarioId}/{capturaEditarId}")]
+        public async Task<ActionResult> EditarCapturaDeUnUsuario(int? usuarioId, int capturaEditarId, [FromBody] CapturaInsertObligatorio captura)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.EditarCapturaDeUnUsuario(usuarioId, capturaEditarId, captura);
                 if (gestion.isCorrect())
                 {
                     return Ok(gestion);

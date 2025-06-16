@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DatosPesca.Context;
 using DatosPesca.Servicio;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DatosPescaContext>(options =>
     options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=PescaDB;Trusted_Connection=True;"));
 builder.Services.AddScoped<ServicioBD>();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
