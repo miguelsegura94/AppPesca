@@ -12,21 +12,23 @@ namespace DatosPesca.Modelos
             [Key]
             public int Id { get; set; } 
             public string Nombre { get; set; }
+            public string Correo { get; set; }
+            public string Contraseña { get; set; }
             public List<Captura>? Capturas { get; set; }
             
         }
         public class Captura
         {
-            //TODO HACER LOS ENUMS PARA LAS PROPIEDADES NECESARIAS
+            
             [Key]
             public int CapturaId { get; set; }
             public int? UsuarioId { get; set; }
             [ForeignKey("UsuarioId")]
             public Usuario? Usuario { get; set; }
-            public string NombreEspecie { get; set; }//*
-            public double Tamaño { get; set; }//*
+            public string NombreEspecie { get; set; }
+            public double Tamaño { get; set; }
             public DateTime? Fecha { get; set; }
-            public string? Localidad { get; set; }//puig,pobla,cullera etc
+            public string? Localidad { get; set; }
             public int HoraAproximada { get; set; }
             public Zona? Zona { get; set; }
             public int Profundidad { get; set; }
@@ -73,9 +75,9 @@ namespace DatosPesca.Modelos
         public class CapturaInsertObligatorio
         {
             public int? UsuarioId { get; set; }
-            public string NombreEspecie { get; set; }//*
-            public double Tamaño { get; set; }//*
-            public EstiloPesca EstiloPesca { get; set; }//*
+            public string NombreEspecie { get; set; }
+            public double Tamaño { get; set; }
+            public EstiloPesca EstiloPesca { get; set; }
         }
         public enum Zona
         {

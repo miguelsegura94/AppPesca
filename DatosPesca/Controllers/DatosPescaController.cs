@@ -128,6 +128,82 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpGet("CapturasPorLista")]
+        public async Task<ActionResult> CapturasPorLista([FromQuery] List<string> propiedades, [FromQuery] List<string> valores)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CapturasPorLista(propiedades, valores);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        //1-Check de como buscar las capturas, por propiedad nombre, tamaño etc
+        //2-Segun las propiedades elegidas, buscar todas las capturas que coincidan con esas propiedades
+        //3-Se pueden elegir varias propiedades a la vez, en ese caso mostrar individualmente, y en conjunto si todas coinciden
+        //es decir, si por nombre coinciden 4, de esas 4 por tamaño ninguna, pues mostrar en un chart pie, las 4 que coinciden por nombre, y que ponga 0
+        //en las que coinciden por tamaño,
+        //4-Buscar en todas las capturas, las que coincidan por ej. con tamaño 20, es decir por propiedad y valor(CapturasPorLista)
+        //
+        //5-Si añado mas variables aqui, por ej gusano coreano, y buscar cuales coinciden con gusano coreano y 20 de tamaño
+        //
+        //hacer un metodo que busque individualmente por lista de propiedades y valores
+        [HttpGet("CapturasPorEspecie/{nombreEspecie}")]
+        public async Task<ActionResult> CapturasPorEspecie(string nombreEspecie)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CapturasPorEspecie(nombreEspecie);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpGet("CapturasPorListaEnEspecie/{nombreEspecie}/{propiedades}/{valores}")]
+        public async Task<ActionResult> CapturasPorListaEnEspecie(string nombreEspecie,List<string> propiedades, List<string> valores)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CapturasPorListaEnEspecie(nombreEspecie,propiedades, valores);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpGet("CapturasdeUsuarioPorPropiedad/{id}/{propiedad}/{valor}")]
         public async Task<ActionResult> GetCapturasDeUnUsuarioPorPropiedad(int id,string propiedad,string valor)
         {
@@ -185,6 +261,7 @@ namespace DatosPesca.Controllers
                 }
                 else
                 {
+                    Console.WriteLine(gestion.error);
                     return NotFound(gestion);
                 }
             }
@@ -289,6 +366,28 @@ namespace DatosPesca.Controllers
             try
             {
                 gestion = await servicioBD.EditarCapturaDeUnUsuario(usuarioId, capturaEditarId, captura);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpPut("EditarCapturaCompletadeUsuario/{usuarioId}/{capturaEditarId}")]
+        public async Task<ActionResult> EditarCapturaCompletaDeUnUsuario(int? usuarioId, int capturaEditarId, [FromBody] CapturaInsert captura)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.EditarCapturaCompletaDeUnUsuario(usuarioId, capturaEditarId, captura);
                 if (gestion.isCorrect())
                 {
                     return Ok(gestion);

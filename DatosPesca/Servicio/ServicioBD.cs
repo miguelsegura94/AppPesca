@@ -18,6 +18,7 @@ namespace DatosPesca.Servicio
             _context = context;
         }
         //TODO AÑADIR NUEVO METODO PARA AÑADIR FOTO DE LA CAPTURA, Y TAMBIEN IMAGEN DE PERFIL DE USUARIO
+        //TODO HACER LA PAGINA PARA BUSCAR POR PROPIEDAD Y QUE SALGAN LOS GRAFICOS Y DEMAS
         public async Task<Gestion> GetUsuarios()
         {
             Gestion gestion = new Gestion();
@@ -104,6 +105,7 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
+
         public async Task<Gestion> GetCapturasPorPropiedad(string propiedad, string valor)
         {
             Gestion gestion = new Gestion();
@@ -204,10 +206,335 @@ namespace DatosPesca.Servicio
                 else
                     gestion.setError($"En {propiedad} no hay capturas con valor {valor}.");
             }
+
             catch (Exception ex)
             {
                 gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
             }
+            return gestion;
+        }
+        public async Task<Gestion> CapturasPorLista(List<string> propiedades, List<string> valores)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                if (propiedades == null || valores == null || propiedades.Count != valores.Count)
+                {
+                    gestion.setError("Las listas de propiedades y valores deben existir y tener la misma longitud.");
+                    return gestion;
+                }
+
+                IQueryable<Captura> query = _context.Capturas;
+                for (int i = 0; i < propiedades.Count; i++)
+                {
+                    var prop = propiedades[i].ToLower();
+                    var val = valores[i];
+
+                    switch (prop)
+                    {
+                        case "especie":
+                            query = query.Where(c => c.NombreEspecie == val);
+                            break;
+
+                        case "localidad":
+                            query = query.Where(c => c.Localidad == val);
+                            break;
+
+                        case "tamaño":
+                            if (double.TryParse(val, out var t))
+                                query = query.Where(c => c.Tamaño == t);
+                            else
+                            {
+                                gestion.setError("El valor para 'tamaño' debe ser numérico.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "fecha":
+                            if (DateTime.TryParse(val, out var fecha))
+                                query = query.Where(c => c.Fecha == fecha);
+                            else
+                            {
+                                gestion.setError("El valor para 'fecha' debe ser una fecha válida.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "hora":
+                            if (int.TryParse(val, out var hora))
+                                query = query.Where(c => c.HoraAproximada == hora);
+                            else
+                            {
+                                gestion.setError("El valor para 'hora' debe ser numérico.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "zona":
+                            if (Enum.TryParse<Zona>(val, true, out var zonaEnum))
+                                query = query.Where(c => c.Zona == zonaEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'zona' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "profundidad":
+                            if (int.TryParse(val, out var prof))
+                                query = query.Where(c => c.Profundidad == prof);
+                            else
+                            {
+                                gestion.setError("El valor para 'profundidad' debe ser numérico.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "oleaje":
+                            if (Enum.TryParse<Oleaje>(val, true, out var oleajeEnum))
+                                query = query.Where(c => c.Oleaje == oleajeEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'oleaje' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "estilo":
+                            if (Enum.TryParse<EstiloPesca>(val, true, out var estiloEnum))
+                                query = query.Where(c => c.EstiloPesca == estiloEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'estilo' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "clima":
+                            if (Enum.TryParse<TiempoClimatico>(val, true, out var climaEnum))
+                                query = query.Where(c => c.TiempoClimatico == climaEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'clima' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "claridad agua":
+                            if (Enum.TryParse<ClaridadAgua>(val, true, out var claridadEnum))
+                                query = query.Where(c => c.ClaridadAgua == claridadEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'claridad agua' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "tamaño anzuelo":
+                            if (Enum.TryParse<TamañoAnzuelo>(val.Replace("/", "_"), true, out var anzEnum))
+                                query = query.Where(c => c.TamañoAnzuelo == anzEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'tamaño anzuelo' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "tipo gusano":
+                            if (Enum.TryParse<TipoCebo>(val, true, out var ceboEnum))
+                                query = query.Where(c => c.TipoCebo == ceboEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'tipo cebo' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "tamaño bajo":
+                            if (double.TryParse(val, out var tBajo))
+                                query = query.Where(c => c.TamañoBajo == tBajo);
+                            else
+                            {
+                                gestion.setError("El valor para 'tamaño bajo' debe ser numérico.");
+                                return gestion;
+                            }
+                            break;
+                        case "tamaño hilo":
+                            if (double.TryParse(val, out var tHilo))
+                                query = query.Where(c => c.TamañoHilo == tHilo);
+                            else
+                            {
+                                gestion.setError("El valor para 'tamaño hilo' debe ser numérico.");
+                                return gestion;
+                            }
+                            break;
+
+                        case "tipo señuelo":
+                            if (Enum.TryParse<TipoSeñuelo>(val, true, out var señEnum))
+                                query = query.Where(c => c.TipoSeñuelo == señEnum);
+                            else
+                            {
+                                gestion.setError("El valor para 'tipo señuelo' no es válido.");
+                                return gestion;
+                            }
+                            break;
+
+                        default:
+                            gestion.setError($"La propiedad '{propiedades[i]}' no es válida.");
+                            return gestion;
+                    }
+                }
+                var lista = await query.ToListAsync();
+
+                if (lista.Any())
+                {
+                    gestion.data = lista;
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError("No hay capturas que cumplan esos filtros.");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> CapturasPorEspecie(string nombreEspecie)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion.data = await _context.Capturas.Where(c => c.NombreEspecie == nombreEspecie).ToListAsync();
+                if (gestion.data.Count > 0)
+                {
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError("No hay capturas en ese usuario");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> CapturasPorListaEnEspecie(string nombreEspecie, List<string> propiedades,List<string> valores)
+        {
+            var capturasEspecie = await _context.Capturas.Where(c => c.NombreEspecie == nombreEspecie).ToListAsync();
+
+            var capturasFinales = new List<Captura>();
+            Gestion gestion = new Gestion();
+
+            try
+            {
+                for (int i = 0; i < propiedades.Count; i++)
+                {
+                    var prop = propiedades[i].ToLower();
+                    var val = valores[i];
+
+                    List<Captura> resultadoFiltro = prop switch
+                    {
+                        "localidad" => capturasEspecie
+                                           .Where(c => c.Localidad == val)
+                                           .ToList(),
+
+                        "tamaño" when double.TryParse(val, out var t)
+                            => capturasEspecie
+                                   .Where(c => c.Tamaño == t)
+                                   .ToList(),
+
+                        "fecha" when DateTime.TryParse(val, out var f)
+                            => capturasEspecie
+                                   .Where(c => c.Fecha == f.Date)
+                                   .ToList(),
+
+                        "hora" when int.TryParse(val, out var h)
+                            => capturasEspecie
+                                   .Where(c => c.HoraAproximada == h)
+                                   .ToList(),
+
+                        "zona" when Enum.TryParse<Zona>(val, true, out var z)
+                            => capturasEspecie
+                                   .Where(c => c.Zona == z)
+                                   .ToList(),
+
+                        "profundidad" when int.TryParse(val, out var p)
+                            => capturasEspecie
+                                   .Where(c => c.Profundidad == p)
+                                   .ToList(),
+
+                        "oleaje" when Enum.TryParse<Oleaje>(val, true, out var o)
+                            => capturasEspecie
+                                   .Where(c => c.Oleaje == o)
+                                   .ToList(),
+
+                        "estilo" when Enum.TryParse<EstiloPesca>(val, true, out var e)
+                            => capturasEspecie
+                                   .Where(c => c.EstiloPesca == e)
+                                   .ToList(),
+
+                        "clima" when Enum.TryParse<TiempoClimatico>(val, true, out var c_)
+                            => capturasEspecie
+                                   .Where(c => c.TiempoClimatico == c_)
+                                   .ToList(),
+
+                        "claridad agua" when Enum.TryParse<ClaridadAgua>(val, true, out var ca)
+                            => capturasEspecie
+                                   .Where(c => c.ClaridadAgua == ca)
+                                   .ToList(),
+
+                        "tamaño anzuelo" when Enum.TryParse<TamañoAnzuelo>(val.Replace("/", "_"), true, out var anz)
+                            => capturasEspecie
+                                   .Where(c => c.TamañoAnzuelo == anz)
+                                   .ToList(),
+
+                        "tipo gusano" when Enum.TryParse<TipoCebo>(val, true, out var ceb)
+                            => capturasEspecie
+                                   .Where(c => c.TipoCebo == ceb)
+                                   .ToList(),
+
+                        "tamaño bajo" when double.TryParse(val, out var tb)
+                            => capturasEspecie
+                                   .Where(c => c.TamañoBajo == tb)
+                                   .ToList(),
+                        "tamaño hilo" when double.TryParse(val, out var th)
+                            => capturasEspecie
+                                   .Where(c => c.TamañoHilo == th)
+                                   .ToList(),
+
+                        "tipo señuelo" when Enum.TryParse<TipoSeñuelo>(val, true, out var s)
+                            => capturasEspecie
+                                   .Where(c => c.TipoSeñuelo == s)
+                                   .ToList(),
+
+                        _ => throw new ArgumentException($"Propiedad o valor inválido: {propiedades[i]} = {valores[i]}")
+                    };
+
+                    if (resultadoFiltro.Any())
+                    {
+                        capturasFinales.AddRange(resultadoFiltro);
+                    }
+                }
+                if (capturasFinales.Any())
+                {
+                    gestion.data = capturasFinales;
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError("No hay capturas que cumplan los criterios especificados.");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError($"Error de tipo {ex.GetType().Name}, mensaje: {ex.Message}");
+            }
+
             return gestion;
         }
 
@@ -347,7 +674,8 @@ namespace DatosPesca.Servicio
             Gestion gestion = new Gestion();
             try
             {
-                bool usuarioExiste = _context.Usuarios.Any(u => u.Id == modeloCaptura.UsuarioId);
+                var usuarioId = modeloCaptura.UsuarioId;
+                bool usuarioExiste = await _context.Usuarios.AnyAsync(u => u.Id == usuarioId);
                 if (!usuarioExiste)
                 {
                     gestion.setError("El usuario al que agregar la captura no existe.");
@@ -434,6 +762,9 @@ namespace DatosPesca.Servicio
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Error EF: " + ex.Message);
+                if (ex.InnerException != null)
+                    Console.WriteLine("Inner: " + ex.InnerException.Message);
                 gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
             }
             return gestion;
@@ -589,17 +920,58 @@ namespace DatosPesca.Servicio
                     gestion.setError("El usuario que buscas no existe.");
                     return gestion;
                 }
-                if (capturaEditar == null)
-                {
-                    gestion.setError("La captura no existe.");
-                    return gestion;
-                }
                 capturaEditar.UsuarioId = captura.UsuarioId;
                 capturaEditar.NombreEspecie = captura.NombreEspecie;
                 capturaEditar.Tamaño = captura.Tamaño;
                 capturaEditar.EstiloPesca = captura.EstiloPesca;
                 gestion.Correct($"Captura editada correctamente.");
                 await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> EditarCapturaCompletaDeUnUsuario(int? usuarioId, int capturaEditarId, CapturaInsert captura)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                Captura capturaEditar = await _context.Capturas.FirstOrDefaultAsync(c => c.CapturaId == capturaEditarId);
+                if (capturaEditar == null)
+                {
+                    gestion.setError("La captura no existe.");
+                    return gestion;
+                }
+                bool usuarioExiste = _context.Usuarios.Any(u => u.Id == usuarioId);
+                if (!usuarioExiste)
+                {
+                    gestion.setError("El usuario que buscas no existe.");
+                    return gestion;
+                }
+                capturaEditar.UsuarioId = captura.UsuarioId;
+                capturaEditar.NombreEspecie = captura.NombreEspecie;
+                capturaEditar.Tamaño = captura.Tamaño;
+                capturaEditar.Fecha = captura.Fecha;
+                capturaEditar.Localidad = captura.Localidad;
+                capturaEditar.HoraAproximada = captura.HoraAproximada;
+                capturaEditar.Zona = captura.Zona;
+                capturaEditar.Profundidad = captura.Profundidad;
+                capturaEditar.Oleaje = captura.Oleaje;
+                capturaEditar.TiempoClimatico = captura.TiempoClimatico;
+                capturaEditar.ClaridadAgua = captura.ClaridadAgua;
+                capturaEditar.EstiloPesca = captura.EstiloPesca;
+                capturaEditar.Anzuelo = captura.Anzuelo;
+                capturaEditar.TamañoAnzuelo = captura.TamañoAnzuelo;
+                capturaEditar.Cebo = captura.Cebo;
+                capturaEditar.TipoCebo = captura.TipoCebo;
+                capturaEditar.TamañoHilo = captura.TamañoHilo;
+                capturaEditar.TamañoBajo = captura.TamañoBajo;
+                capturaEditar.Señuelo = captura.Señuelo;
+                capturaEditar.TipoSeñuelo = captura.TipoSeñuelo;
+                await _context.SaveChangesAsync();
+                gestion.Correct($"Captura editada correctamente.");
             }
             catch (Exception ex)
             {

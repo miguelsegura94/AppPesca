@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using DatosPesca.Context;
 using DatosPesca.Servicio;
@@ -8,11 +9,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DatosPescaContext>(options =>
-    options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=PescaDB;Trusted_Connection=True;"));
+{
+    options.EnableSensitiveDataLogging();
+    options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=PescaDB;Trusted_Connection=True;");
+});
+
 builder.Services.AddScoped<ServicioBD>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
