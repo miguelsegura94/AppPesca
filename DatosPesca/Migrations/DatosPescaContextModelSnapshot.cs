@@ -96,7 +96,7 @@ namespace DatosPesca.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("Capturas");
+                    b.ToTable("Capturas", (string)null);
                 });
 
             modelBuilder.Entity("DatosPesca.Modelos.DatosPescaModelos+Usuario", b =>
@@ -121,7 +121,7 @@ namespace DatosPesca.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
                 });
 
             modelBuilder.Entity("DatosPesca.Modelos.DatosPescaModelos+Captura", b =>

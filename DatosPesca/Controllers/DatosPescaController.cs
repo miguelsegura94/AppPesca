@@ -248,6 +248,28 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpPost("RegistroDeUsuario")]
+        public async Task<ActionResult> RegistroDeUsuario([FromBody] UsuarioRegistroInsert modeloUsuario)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.RegistroDeUsuario(modeloUsuario);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpPost("AnadirCaptura")]
         public async Task<ActionResult> AñadirCapturaCompleta([FromBody] CapturaInsert modeloCaptura)
         {

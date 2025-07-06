@@ -72,6 +72,12 @@ namespace DatosPesca.Modelos
         {
             public string Nombre { get; set; }
         }
+        public class UsuarioRegistroInsert
+        {
+            public string Nombre { get; set; }
+            public string Correo { get; set; }
+            public string Contraseña { get; set; }
+        }
         public class CapturaInsertObligatorio
         {
             public int? UsuarioId { get; set; }

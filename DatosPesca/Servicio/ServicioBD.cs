@@ -787,6 +787,25 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
+        public async Task<Gestion> RegistroDeUsuario(UsuarioRegistroInsert modeloUsuario)
+        {
+            Gestion gestion = new Gestion();
+            Usuario usuarioAdd = new Usuario();
+            try
+            {
+                usuarioAdd.Nombre = modeloUsuario.Nombre;
+                usuarioAdd.Correo = modeloUsuario.Correo;
+                usuarioAdd.Contraseña = modeloUsuario.Contraseña;
+                await _context.Usuarios.AddAsync(usuarioAdd);
+                await _context.SaveChangesAsync();
+                gestion.Correct("Usuario creado correctamente");
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
         public async Task<Gestion> AñadirCapturaObligatorio(CapturaInsertObligatorio modeloCaptura)
         {
             Gestion gestion = new Gestion();
