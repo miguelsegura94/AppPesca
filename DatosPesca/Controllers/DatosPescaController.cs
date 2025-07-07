@@ -270,6 +270,28 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpPost("CambiarContrasena")]
+        public async Task<ActionResult> CambiarContraseña(int usuarioId,string nuevaContraseña)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CambiarContraseña(usuarioId, nuevaContraseña);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpPost("AnadirCaptura")]
         public async Task<ActionResult> AñadirCapturaCompleta([FromBody] CapturaInsert modeloCaptura)
         {

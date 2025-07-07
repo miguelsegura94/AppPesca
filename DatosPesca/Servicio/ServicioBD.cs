@@ -806,6 +806,31 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
+        public async Task<Gestion> CambiarContraseña(int usuarioId, string nuevaContraseña)
+        {
+            Gestion gestion = new Gestion();
+            Usuario usuarioModificarContraseña = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            try
+            {
+                if (usuarioModificarContraseña != null)
+                {
+                    usuarioModificarContraseña.Contraseña = nuevaContraseña;
+                    await _context.SaveChangesAsync();
+                    gestion.Correct("Usuario creado correctamente");
+                }
+                else
+                {
+                    gestion.setError("No hay usuarios con ese ID");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
         public async Task<Gestion> AñadirCapturaObligatorio(CapturaInsertObligatorio modeloCaptura)
         {
             Gestion gestion = new Gestion();
