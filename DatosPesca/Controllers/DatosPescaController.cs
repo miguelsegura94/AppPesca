@@ -38,6 +38,28 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpGet("GetUsuarioPorId/{id}")]
+        public async Task<ActionResult> GetUsuarioPorId(int id)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.GetUsuarioPorId(id);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpGet("UsuariosConCapturas")]
         public async Task<ActionResult> GetUsuariosConCapturas()
         {
@@ -226,6 +248,28 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpGet("Login/{username}/{password}")]
+        public async Task<ActionResult> Login(string username, string password)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.Login(username, password);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpPost("Crear usuario")]
         public async Task<ActionResult> CrearUsuario([FromBody] UsuarioInsert modeloUsuario)
         {
@@ -270,13 +314,79 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
-        [HttpPost("CambiarContrasena")]
-        public async Task<ActionResult> CambiarContraseña(int usuarioId,string nuevaContraseña)
+        [HttpPut("ResetContrasena/{id}/{nuevaContraseña}")]
+        public async Task<ActionResult> ResetContraseña(int usuarioId,string nuevaContraseña)
         {
             Gestion gestion = new Gestion();
             try
             {
-                gestion = await servicioBD.CambiarContraseña(usuarioId, nuevaContraseña);
+                gestion = await servicioBD.ResetContraseña(usuarioId, nuevaContraseña);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpPut("CambiarNombre/{usuarioId}/{nuevoNombre}")]
+        public async Task<ActionResult> CambiarNombre(int usuarioId, string nuevoNombre)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CambiarNombre(usuarioId, nuevoNombre);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpPut("CambiarCorreo/{usuarioId}/{nuevoCorreo}")]
+        public async Task<ActionResult> CambiarCorreo(int usuarioId, string nuevoCorreo)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CambiarCorreo(usuarioId, nuevoCorreo);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
+        [HttpPut("CambiarContrasena/{usuarioId}/{contraseñaActual}/{nuevaContraseña}")]
+        public async Task<ActionResult> CambiarContraseña(int usuarioId,string contraseñaActual, string nuevaContraseña)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.CambiarContraseña(usuarioId, contraseñaActual, nuevaContraseña);
                 if (gestion.isCorrect())
                 {
                     return Ok(gestion);

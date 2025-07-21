@@ -2,6 +2,7 @@
 using GestorBaseDatos.GestionCarpeta;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using BCrypt.Net;
 using static System.Collections.Specialized.BitVector32;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static DatosPesca.Modelos.DatosPescaModelos;
@@ -32,6 +33,29 @@ namespace DatosPesca.Servicio
                 else
                 {
                     gestion.setError("No hay usuarios");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+
+        }
+        public async Task<Gestion> GetUsuarioPorId(int id)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                Usuario user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
+                if (user != null)
+                {
+                    gestion.data = user;
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError("Usuario o contraseña incorrectos");
                 }
             }
             catch (Exception ex)
@@ -769,7 +793,28 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
-
+        public async Task<Gestion> Login(string username, string password)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                Usuario user = await _context.Usuarios.FirstOrDefaultAsync(u => u.Nombre == username);
+                if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Contraseña))
+                {
+                    gestion.data = user;
+                    gestion.Correct();
+                }
+                else
+                {
+                    gestion.setError("Usuario o contraseña incorrectos");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
         public async Task<Gestion> CrearUsuario(UsuarioInsert modeloUsuario)
         {
             Gestion gestion = new Gestion();
@@ -795,7 +840,7 @@ namespace DatosPesca.Servicio
             {
                 usuarioAdd.Nombre = modeloUsuario.Nombre;
                 usuarioAdd.Correo = modeloUsuario.Correo;
-                usuarioAdd.Contraseña = modeloUsuario.Contraseña;
+                usuarioAdd.Contraseña = BCrypt.Net.BCrypt.HashPassword(modeloUsuario.Contraseña);
                 await _context.Usuarios.AddAsync(usuarioAdd);
                 await _context.SaveChangesAsync();
                 gestion.Correct("Usuario creado correctamente");
@@ -806,18 +851,97 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
-        public async Task<Gestion> CambiarContraseña(int usuarioId, string nuevaContraseña)
+        public async Task<Gestion> ResetContraseña(int usuarioId, string nuevaContraseña)
+        {
+            Gestion gestion = new Gestion();
+            Usuario usuarioResetContraseña = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
+            try
+            {
+                if (usuarioResetContraseña != null)
+                {
+                    usuarioResetContraseña.Contraseña = BCrypt.Net.BCrypt.HashPassword(nuevaContraseña);
+                    await _context.SaveChangesAsync();
+                    gestion.Correct("Usuario creado correctamente");
+                }
+                else
+                {
+                    gestion.setError("No hay usuarios con ese ID");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> CambiarNombre(int usuarioId, string nuevoNombre)
+        {
+            Gestion gestion = new Gestion();
+            Usuario usuarioModificarNombre = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
+            try
+            {
+                if (usuarioModificarNombre != null)
+                {
+                    usuarioModificarNombre.Nombre = nuevoNombre;
+                    await _context.SaveChangesAsync();
+                    gestion.Correct("Usuario editado correctamente");
+                }
+                else
+                {
+                    gestion.setError("No hay usuarios con ese ID");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> CambiarCorreo(int usuarioId, string nuevoCorreo)
+        {
+            Gestion gestion = new Gestion();
+            Usuario usuarioModificarCorreo = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
+            try
+            {
+                if (usuarioModificarCorreo != null)
+                {
+                    usuarioModificarCorreo.Correo = nuevoCorreo;
+                    await _context.SaveChangesAsync();
+                    gestion.Correct("Usuario editado correctamente");
+                }
+                else
+                {
+                    gestion.setError("No hay usuarios con ese ID");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
+        public async Task<Gestion> CambiarContraseña(int usuarioId, string contraseñaActual, string nuevaContraseña)
         {
             Gestion gestion = new Gestion();
             Usuario usuarioModificarContraseña = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
-
             try
             {
                 if (usuarioModificarContraseña != null)
                 {
-                    usuarioModificarContraseña.Contraseña = nuevaContraseña;
-                    await _context.SaveChangesAsync();
-                    gestion.Correct("Usuario creado correctamente");
+                    if (BCrypt.Net.BCrypt.Verify(contraseñaActual, usuarioModificarContraseña.Contraseña))
+                    {
+                        usuarioModificarContraseña.Contraseña = BCrypt.Net.BCrypt.HashPassword(nuevaContraseña);
+                        await _context.SaveChangesAsync();
+                        gestion.Correct("Usuario editado correctamente");
+                    }
+                    else
+                    {
+                        gestion.setError("La contraseña actual es errónea");
+                    }
+                    
                 }
                 else
                 {
