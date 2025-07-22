@@ -425,6 +425,29 @@ namespace DatosPesca.Controllers
             }
             return BadRequest(gestion);
         }
+        [HttpPost("AnadirImagenCaptura/{idCaptura}")]
+        public async Task<ActionResult> AnadirImagenCaptura(int idCaptura, IFormFile imagen)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                gestion = await servicioBD.AnadirImagenCaptura(idCaptura,imagen);
+                if (gestion.isCorrect())
+                {
+                    return Ok(gestion);
+                }
+                else
+                {
+                    Console.WriteLine(gestion.error);
+                    return NotFound(gestion);
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return BadRequest(gestion);
+        }
         [HttpPost("AnadirCapturaObligatorio")]
         public async Task<ActionResult> AñadirCapturaObligatorio([FromBody] CapturaInsertObligatorio modeloCaptura)
         {

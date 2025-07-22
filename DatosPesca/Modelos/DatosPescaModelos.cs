@@ -22,6 +22,7 @@ namespace DatosPesca.Modelos
             
             [Key]
             public int CapturaId { get; set; }
+            public string? ImagenNombre { get; set; }
             public int? UsuarioId { get; set; }
             [ForeignKey("UsuarioId")]
             public Usuario? Usuario { get; set; }

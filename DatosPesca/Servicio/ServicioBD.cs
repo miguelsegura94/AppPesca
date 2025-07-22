@@ -996,6 +996,37 @@ namespace DatosPesca.Servicio
             }
             return gestion;
         }
+        public async Task<Gestion> AnadirImagenCaptura(int idCaptura, IFormFile imagen)
+        {
+            Gestion gestion = new Gestion();
+            try
+            {
+                Captura captura = await _context.Capturas.FirstOrDefaultAsync(c => c.CapturaId == idCaptura);
+                if (captura==null)
+                {
+                    gestion.setError("No hay capturas con ese id.");
+                    return gestion;
+                }
+                if (imagen != null && imagen.Length > 0)
+                {
+                    var nombreArchivo = $"{Guid.NewGuid()}_{Path.GetFileName(imagen.FileName)}";
+                    var ruta = Path.Combine("wwwroot", "imagenes_capturas", nombreArchivo);
+                    using (var stream = new FileStream(ruta, FileMode.Create))
+                    {
+                        await imagen.CopyToAsync(stream);
+                    }
+
+                    captura.ImagenNombre = nombreArchivo;
+                    await _context.SaveChangesAsync();
+                    gestion.Correct("Imagen añadida correctamente");
+                }
+            }
+            catch (Exception ex)
+            {
+                gestion.setError("Error de tipo {0}, mensaje: {1}", new List<dynamic>() { ex.GetType().Name, ex.Message });
+            }
+            return gestion;
+        }
         public async Task<Gestion> EliminarCaptura(int id)
         {
             Gestion gestion = new Gestion();
