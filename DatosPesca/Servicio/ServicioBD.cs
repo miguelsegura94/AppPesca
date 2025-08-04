@@ -7,17 +7,21 @@ using static System.Collections.Specialized.BitVector32;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static DatosPesca.Modelos.DatosPescaModelos;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DatosPesca.Servicio
 {
     public class ServicioBD
     {
         private readonly DatosPescaContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ServicioBD(DatosPescaContext context)
+        public ServicioBD(DatosPescaContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
+
         //TODO AÑADIR NUEVO METODO PARA AÑADIR FOTO DE LA CAPTURA, Y TAMBIEN IMAGEN DE PERFIL DE USUARIO
         //TODO HACER LA PAGINA PARA BUSCAR POR PROPIEDAD Y QUE SALGAN LOS GRAFICOS Y DEMAS
         public async Task<Gestion> GetUsuarios()
@@ -988,6 +992,7 @@ namespace DatosPesca.Servicio
                 captura.EstiloPesca = modeloCaptura.EstiloPesca;
                 await _context.Capturas.AddAsync(captura);
                 await _context.SaveChangesAsync();
+                gestion.data = captura.CapturaId;
                 gestion.Correct("Captura añadida correctamente");
             }
             catch (Exception ex)
@@ -1009,6 +1014,14 @@ namespace DatosPesca.Servicio
                 }
                 if (imagen != null && imagen.Length > 0)
                 {
+                    if (!string.IsNullOrWhiteSpace(captura.ImagenNombre))
+                    {
+                        var rutaImagenAntigua = Path.Combine(_webHostEnvironment.WebRootPath, "imagenes_capturas", captura.ImagenNombre);
+                        if (System.IO.File.Exists(rutaImagenAntigua))
+                        {
+                            System.IO.File.Delete(rutaImagenAntigua);
+                        }
+                    }
                     var nombreArchivo = $"{Guid.NewGuid()}_{Path.GetFileName(imagen.FileName)}";
                     var ruta = Path.Combine("wwwroot", "imagenes_capturas", nombreArchivo);
                     using (var stream = new FileStream(ruta, FileMode.Create))

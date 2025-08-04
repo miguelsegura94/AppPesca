@@ -438,7 +438,6 @@ namespace DatosPesca.Controllers
                 }
                 else
                 {
-                    Console.WriteLine(gestion.error);
                     return NotFound(gestion);
                 }
             }
